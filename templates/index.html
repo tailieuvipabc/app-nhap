@@ -1,1 +1,94 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thống kê thi thử THPT</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Thống kê thi thử tốt nghiệp THPT</h1>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="messages">
+            {% for category, message in messages %}
+              <p class="message {{ category }}">{{ message }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <section class="card">
+        <h2>Import file Excel</h2>
+        <p>
+          File cần có các cột bắt buộc: <code>so_bao_danh</code>, <code>ho_va_ten</code>,
+          <code>lop</code> và các cột điểm môn học (ví dụ: <code>toan</code>, <code>van</code>, <code>anh</code>...)
+        </p>
+        <form action="{{ url_for('import_excel') }}" method="post" enctype="multipart/form-data">
+          <input type="file" name="excel_file" accept=".xlsx,.xls" required />
+          <button type="submit">Import dữ liệu</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Lọc theo lớp / môn học</h2>
+        <form method="get" class="filters">
+          <label>
+            Lớp
+            <select name="class_name">
+              <option value="">Tất cả lớp</option>
+              {% for class_name in class_options %}
+                <option value="{{ class_name }}" {% if selected_class == class_name %}selected{% endif %}>{{ class_name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <label>
+            Môn học
+            <select name="subject_name">
+              <option value="">Tất cả môn</option>
+              {% for subject_name in subject_options %}
+                <option value="{{ subject_name }}" {% if selected_subject == subject_name %}selected{% endif %}>{{ subject_name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <button type="submit">Xem kết quả</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Kết quả</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Số báo danh</th>
+              <th>Họ và tên</th>
+              <th>Lớp</th>
+              <th>Môn học</th>
+              <th>Điểm</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>{{ row.exam_number }}</td>
+                <td>{{ row.full_name }}</td>
+                <td>{{ row.class_name }}</td>
+                <td>{{ row.subject_name }}</td>
+                <td>{{ '%.2f'|format(row.score) }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="empty">Chưa có dữ liệu phù hợp.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>
 
